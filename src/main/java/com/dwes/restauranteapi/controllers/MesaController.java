@@ -35,7 +35,7 @@ public class MesaController {
     @PostMapping("/mesas")
     public ResponseEntity<Mesa> insertMesa(@RequestBody Mesa mesa){
         var mesaGuardado = mesaRepository.save(mesa);
-        return ResponseEntity.status(HttpStatus.CREATED).body(mesaGuardado);    //Devuelve el código status 201 Created
+        return ResponseEntity.status(HttpStatus.CREATED).body(mesaGuardado);    //Devuelve el código status 201 Createdd
     }
 
     @DeleteMapping("/mesas/{id}")
