@@ -44,7 +44,7 @@ public class ReservaController {
         return ResponseEntity.ok(reservasDTO);
     }
 
-    // Nuevo metodo para listar reservas por fecha específica
+    // Nuevo metodo para listar reservas por fecha específicaa
     @GetMapping("/reservas")
     public ResponseEntity<List<ReservaConClientesMesa>> getReservasPorFecha(
             @RequestParam("fecha") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {

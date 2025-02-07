@@ -28,7 +28,7 @@ public class Reserva {
     private Long id;
 
     @NotNull(message = "La fecha no puede ser nula.")
-    @FutureOrPresent(message = "La fecha de la reserva debe ser en el futuro.")
+    @FutureOrPresent(message = "La fecha de la reserva debe ser hoy o mañana.")
     private LocalDate fecha;
 
     @NotNull(message = "La hora no puede ser nula.")
