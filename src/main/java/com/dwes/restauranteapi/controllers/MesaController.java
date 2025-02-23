@@ -2,15 +2,21 @@ package com.dwes.restauranteapi.controllers;
 
 import com.dwes.restauranteapi.entities.Cliente;
 import com.dwes.restauranteapi.entities.Mesa;
+import com.dwes.restauranteapi.entities.Reserva;
 import com.dwes.restauranteapi.repositories.ClienteRepository;
 import com.dwes.restauranteapi.repositories.MesaRepository;
+import com.dwes.restauranteapi.repositories.ReservaRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -19,6 +25,8 @@ public class MesaController {
     private ClienteRepository clienteRepository;
     @Autowired
     private MesaRepository mesaRepository;
+    @Autowired
+    private ReservaRepository reservaRepository;
 
     /**
      * Obtener todos los empleados en un JSON
@@ -64,5 +72,36 @@ public class MesaController {
                 })
                 .orElse(ResponseEntity.notFound().build()); // HTTP 404 Not Found
     }
+
+    @GetMapping("/mesas/disponibles")
+    public ResponseEntity<List<Mesa>> getMesasDisponibles(
+            @RequestParam("fecha") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
+            @RequestParam("hora") @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime hora) {
+
+        // Obtener todas las mesas
+        List<Mesa> todasLasMesas = mesaRepository.findAll();
+
+        // Obtener reservas para la fecha y hora seleccionadas
+        List<Reserva> reservas = reservaRepository.findByFechaAndHora(fecha, hora);
+
+        // Extraer mesas ocupadas de las reservas
+        List<Mesa> mesasOcupadas = new ArrayList<>();
+        for (Reserva reserva : reservas) {
+            if (reserva.getMesa() != null) {
+                mesasOcupadas.add(reserva.getMesa());
+            }
+        }
+
+        // Filtrar mesas disponibles
+        List<Mesa> mesasDisponibles = todasLasMesas.stream()
+                .filter(mesa -> !mesasOcupadas.contains(mesa))
+                .toList();
+
+        return ResponseEntity.ok(mesasDisponibles);
+    }
+
+
+
+
 
 }

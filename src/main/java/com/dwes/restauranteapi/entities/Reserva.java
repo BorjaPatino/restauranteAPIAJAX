@@ -35,13 +35,13 @@ public class Reserva {
     private LocalTime hora;
 
     @Min(value = 1, message = "El número de personas debe ser al menos 1.")
-    private Integer numeroPersonas;
+    private Integer numeroPersonas = 1;
 
     @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "mesa_id", nullable = false)
     private Mesa mesa;
 }

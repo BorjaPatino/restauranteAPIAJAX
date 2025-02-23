@@ -39,6 +39,10 @@ public class UserEntity implements UserDetails{
     @CollectionTable(name = "user_authorities", joinColumns = @JoinColumn(name = "user_id"))
     private List<String> authorities = new ArrayList<>();
 
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private Cliente cliente;
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.authorities.stream()

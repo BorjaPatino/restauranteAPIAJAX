@@ -37,4 +37,10 @@ public class Cliente {
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Reserva> reservas;
+
+    @OneToOne
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private UserEntity usuario;
+
+
 }
