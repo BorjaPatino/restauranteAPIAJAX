@@ -86,7 +86,7 @@ public class ReservaController {
     public ResponseEntity<List<ReservaConClientesMesa>> getAllReservas() {
         List<ReservaConClientesMesa> reservasDTO = new ArrayList<>();
 
-        // Obtener todas las reservas desde la base de datos
+        // Obtener todas las reservas desde la base de datosd
         reservaRepository.findAll().forEach(reserva -> {
             reservasDTO.add(
                     ReservaConClientesMesa.builder()
