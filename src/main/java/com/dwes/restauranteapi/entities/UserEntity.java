@@ -20,7 +20,7 @@ import java.util.List;
 @Setter
 @Builder
 public class UserEntity implements UserDetails{
-//
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

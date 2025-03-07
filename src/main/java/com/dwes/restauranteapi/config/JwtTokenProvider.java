@@ -33,7 +33,7 @@ public class JwtTokenProvider {
     }
 
 
-    //Validar firma del tokenf
+    //Validar firma del token
     public boolean isValidToken(String token) {
         if(StringUtils.isBlank(token)){
             return false;

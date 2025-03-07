@@ -37,7 +37,7 @@ public class JwtFilter extends OncePerRequestFilter {
             String email = this.tokenProvider.getUsernameFromToken(token);
             UserDetails user = this.userDetailsService.loadUserByUsername(email);
 
-            //Información sobre el usuario que se acaba de autenticard
+            //Información sobre el usuario que se acaba de autenticar
             Authentication auth = new UsernamePasswordAuthenticationToken(
                     email,
                     user.getPassword(),
