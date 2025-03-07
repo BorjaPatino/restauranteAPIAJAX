@@ -15,5 +15,5 @@ public class UserRegisterDTO {
     private String password;
     private String password2;
     private String foto;
-
+    private String telefono;
 }

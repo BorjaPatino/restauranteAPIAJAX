@@ -106,29 +106,50 @@ public class ReservaController {
         return ResponseEntity.ok(reservasDTO);
     }
 
+    @GetMapping("/mis_reservas")
+    public ResponseEntity<List<ReservaConClientesMesa>> getMisReservas(Authentication authentication) {
+        String emailAutenticado = authentication.getName();
+        List<ReservaConClientesMesa> reservasDTO = new ArrayList<>();
+
+        // Filtrar reservas del usuario autenticado
+        reservaRepository.findByClienteEmail(emailAutenticado).forEach(reserva -> {
+            reservasDTO.add(
+                    ReservaConClientesMesa.builder()
+                            .id(reserva.getId())
+                            .nombreCliente(reserva.getCliente().getNombre())
+                            .emailCliente(reserva.getCliente().getEmail())
+                            .telefonoCliente(reserva.getCliente().getTelefono())
+                            .numeroMesa(reserva.getMesa().getNumero())
+                            .descripcionMesa(reserva.getMesa().getDescripcion())
+                            .numeroPersonas(reserva.getNumeroPersonas())
+                            .fechaReserva(reserva.getFecha())
+                            .horaReserva(reserva.getHora())
+                            .build()
+            );
+        });
+
+        return ResponseEntity.ok(reservasDTO);
+    }
+
+
 
     @PostMapping("/reservas/add")
     public ResponseEntity<String> createReserva(@RequestBody @Valid Reserva nuevaReserva, Authentication authentication) {
-        System.out.println(" Recibiendo solicitud para crear reserva...");
+        // Verificar si la fecha es anterior a hoy
+        if (nuevaReserva.getFecha().isBefore(LocalDate.now())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("No se pueden hacer reservas en fechas pasadas.");
+        }
 
-        // Obtener el usuario autenticado
-        String username = authentication.getName();
-        System.out.println(" Buscando usuario con username: " + username);
-
-        // Buscar el usuario en la base de datos
-        UserEntity usuario = userEntityRepository.findByUsername(username)
+        String email = authentication.getName();
+        UserEntity usuario = userEntityRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // Buscar el cliente relacionado con el usuario
         Cliente cliente = clienteRepository.findByUsuario(usuario)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
-        System.out.println("✅ Cliente encontrado: " + cliente.getNombre());
-
-        // Asignar cliente a la reserva
         nuevaReserva.setCliente(cliente);
 
-        // Verificar si la mesa está disponible
         boolean mesaDisponible = reservaRepository.existsByMesaAndFechaAndHora(
                 nuevaReserva.getMesa(),
                 nuevaReserva.getFecha(),
@@ -140,24 +161,17 @@ public class ReservaController {
                     .body("La mesa ya está reservada para la fecha y hora seleccionadas.");
         }
 
-        // Guardar la reserva
         reservaRepository.save(nuevaReserva);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("Reserva creada exitosamente.");
     }
 
-
-
-
     @DeleteMapping("/reservas/delete/{id}")
     public ResponseEntity<?> deleteReserva(@PathVariable Long id, Authentication authentication) {
         return reservaRepository.findById(id)
                 .map(reserva -> {
-                    String emailAutenticado = authentication.getName(); // Esto ahora devuelve el email
+                    String emailAutenticado = authentication.getName();
                     String emailCliente = reserva.getCliente().getEmail();
-
-                    System.out.println(" Usuario autenticado: " + emailAutenticado);
-                    System.out.println(" Cliente de la reserva: " + emailCliente);
 
                     if (!emailCliente.equals(emailAutenticado)) {
                         System.out.println(" No autorizado para eliminar esta reserva");
@@ -169,9 +183,6 @@ public class ReservaController {
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
-
-
-
 
 
 

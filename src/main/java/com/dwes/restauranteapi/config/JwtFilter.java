@@ -16,9 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-/**
- * Extrae el token JWT de la cabecera Authoritation de la petición HTTP
- */
+
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -36,29 +34,27 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = this.extractToken(request);
 
         if(this.tokenProvider.isValidToken(token)){
-            String username = this.tokenProvider.getUsernameFromToken(token);
-
-            //UserDetails representa al usuario
-            UserDetails user = this.userDetailsService.loadUserByUsername(username); //Carga el usuario de la base de datos
+            String email = this.tokenProvider.getUsernameFromToken(token);
+            UserDetails user = this.userDetailsService.loadUserByUsername(email);
 
             //Información sobre el usuario que se acaba de autenticar
             Authentication auth = new UsernamePasswordAuthenticationToken(
-                    user.getUsername(),
+                    email,
                     user.getPassword(),
-                    user.getAuthorities());
+                    user.getAuthorities()
+            );
 
-            //SecurityContext permite ver o establecer un usuario logeado
+
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
 
-        //Reenviamos la petición a los siguientes filtros
         filterChain.doFilter(request, response);
     }
 
     private String extractToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7); //Quitamos el Bearer y nos quedamos con el token
+            return bearerToken.substring(7);
         }
         return null;
     }

@@ -34,8 +34,8 @@ public class UserEntity implements UserDetails{
     private String foto;
 
 
-    @Builder.Default    //Para que Lombok con el patrón builder cree el ArrayList
-    @ElementCollection(fetch = FetchType.EAGER) // Indica que esta lista se almacena en una tabla separada, pero sin una relación
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_authorities", joinColumns = @JoinColumn(name = "user_id"))
     private List<String> authorities = new ArrayList<>();
 

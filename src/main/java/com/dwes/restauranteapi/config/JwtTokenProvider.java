@@ -19,21 +19,19 @@ public class JwtTokenProvider {
     private static final long EXPIRATION_TIME = 86400000; // 1 día
 
 
-    public String  generateToken(Authentication authentication) {
-
+    public String generateToken(Authentication authentication) {
         UserEntity user = (UserEntity) authentication.getPrincipal();
         SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
         return Jwts.builder()
-                .subject(Long.toString(user.getId()))
-                .claim("email", user.getEmail())
+                .subject(user.getEmail())
                 .claim("username", user.getUsername())
-                .claim("foto","default.jpg")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(key) // Firma con el algoritmo por defecto
+                .signWith(key)
                 .compact();
     }
+
 
     //Validar firma del token
     public boolean isValidToken(String token) {
@@ -50,8 +48,6 @@ public class JwtTokenProvider {
             validator.parse(token);
             return true;
         }catch (Exception e){
-            //Aquí entraría si el token no fuera correcto o estuviera caducado.
-            // Podríamos hacer un log de los fallos
             System.err.println("Error al validar el token: " + e.getMessage());
             return false;
         }
@@ -63,6 +59,17 @@ public class JwtTokenProvider {
                 .verifyWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
                 .build();
         Claims claims = parser.parseClaimsJws(token).getBody();
-        return claims.get("username").toString();
+        return claims.getSubject();
     }
+
+
+
+    public String getEmailFromToken(String token) {
+        JwtParser parser = Jwts.parser()
+                .verifyWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
+                .build();
+        Claims claims = parser.parseClaimsJws(token).getBody();
+        return claims.get("email").toString();
+    }
+
 }

@@ -42,24 +42,22 @@ public class AuthController {
     @PostMapping("/auth/register")
     public ResponseEntity<Map<String, String>> save(@RequestBody UserRegisterDTO userDTO) {
         try {
-            // 1️⃣ Crear el usuario en la tabla user_entity
             UserEntity userEntity = userRepository.save(
                     UserEntity.builder()
                             .username(userDTO.getUsername())
                             .password(passwordEncoder.encode(userDTO.getPassword()))
                             .email(userDTO.getEmail())
-                            .authorities(List.of("ROLE_USER")) // Ajusta los roles según tu necesidad
+                            .authorities(List.of("ROLE_USER"))
                             .foto(userDTO.getFoto())
                             .build());
 
-            // 2️⃣ Crear automáticamente un cliente en la tabla cliente
             Cliente cliente = new Cliente();
             cliente.setNombre(userDTO.getUsername());
             cliente.setEmail(userDTO.getEmail());
-            cliente.setTelefono("123456789"); // Puedes cambiarlo por un campo opcional en el registro
-            cliente.setUsuario(userEntity); // Relacionar el cliente con el usuario
+            cliente.setTelefono(userDTO.getTelefono());
+            cliente.setUsuario(userEntity);
 
-            clienteRepository.save(cliente); // Guardar cliente en la BD
+            clienteRepository.save(cliente);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     Map.of("email", userEntity.getEmail(), "username", userEntity.getUsername())
@@ -70,25 +68,18 @@ public class AuthController {
     }
 
 
-
-
-
     @PostMapping("/auth/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginDTO) {
         try {
-            // Validamos al usuario en Spring Security
             UsernamePasswordAuthenticationToken userPassAuthToken =
                     new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword());
             Authentication auth = authenticationManager.authenticate(userPassAuthToken);
 
-            // Obtenemos el usuario autenticado
             UserEntity user = (UserEntity) auth.getPrincipal();
 
-            // Generamos el token con la información del usuario
             String token = this.tokenProvider.generateToken(auth);
 
-            // Devolvemos la respuesta incluyendo el email
-            return ResponseEntity.ok(new LoginResponseDTO(user.getUsername(), user.getEmail(), token)); // <-- AÑADE EL EMAIL AQUÍ
+            return ResponseEntity.ok(new LoginResponseDTO(user.getUsername(), user.getEmail(), token));
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
